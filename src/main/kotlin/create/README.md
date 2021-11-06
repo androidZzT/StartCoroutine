@@ -30,11 +30,11 @@ coroutine end: Success(5)
 
 ### 协程的执行过程
 
-![](../../resources/call_stack.png)
+![](../../resources/create/call_stack.png)
 
 调用栈流程如下
 
-![](../../resources/call_process.png)
+![](../../resources/create/call_process.png)
 
 1. 我们通过 suspend block#createCoroutine 得到的 coroutine 实际是 SafeContinuation 对象 
 2. SafeContinuation 实际上是代理类，其中的 delegate 属性才是真正的 Continuation 对象 
@@ -86,7 +86,7 @@ internal abstract class BaseContinuationImpl(
 
 下面我通过断点，进一步分析 suspend block 是通过哪个子类执行的。
 
-![](../../resources/break_point.png)
+![](../../resources/create/break_point.png)
 
 可以看到 current 是名为 {文件}${方法}${变量}$1 格式的对象，证明 kotlin 编译器遇到 suspend 关键字后会帮我们生成一个 BaseContinuationImpl 的子类
 
@@ -137,3 +137,13 @@ final class CreateCoroutineKt$create.main$coroutine$1 extends SuspendLambda impl
 ```
 
 明显看出，kt 编译器帮助我们把 suspend 关键字变为了 SuspendLambda 的 子类，并重写了 invokeSuspend 方法，不难猜出 SuspendLambda 继承自 BaseContinuationImp
+
+### 总结
+
+用一个类图简单的总结一个协程创建并执行的过程。
+
+![](../../resources/create/uml.png)
+1. suspend block(lambda) 在编译时会转变为 SuspendLambda 的匿名子类，并把 block 中的逻辑通过重写 invokeSuspend 实现
+2. 调用 suspend_lambda.createCoroutine 会得到 SafeContinuation 对象，这只是一个代理类，代理的对象正是我们传入的 SuspendLambda
+3. createCoroutine 的参数是 completion，代表协程执行完毕的回调
+4. 最终调用到了 BaseContinuationImpl 的 resumeWith，完成协程的调用，调用完毕的回调
