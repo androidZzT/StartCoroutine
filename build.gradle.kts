@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.10"
     java
 }
 
@@ -14,6 +14,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 }
 
 tasks.getByName<Test>("test") {

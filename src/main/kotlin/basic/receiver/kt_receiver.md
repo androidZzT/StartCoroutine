@@ -25,11 +25,11 @@ fun String.buildString(action: StringBuilder.() -> Unit): String {
 上述代码可以为 String 增加一个扩展函数 buildString，可以直接在 buildString {} 作用域中使用 StringBuilder 的 append 或其他方法，省去了我们自己 new StringBuilder 的过程
 
 下面是对代码的详细解释
-![](../../../resources/base/receiver/define_receiver.png)
+![](../../../resources/basic/receiver/define_receiver.png)
 * 形如 T.() -> R 的函数，就是 Receiver 类型
 * 需要通过调用 [T的对象].() 的方式，来把 [T的对象] 作为 this 传到 lambda 作用域中
 
-![](../../../resources/base/receiver/call_receiver.png)
+![](../../../resources/basic/receiver/call_receiver.png)
 * 调用扩展函数时，可以显式用 this 访问传进来的对象
 * 也可隐式调用
 
@@ -37,7 +37,7 @@ fun String.buildString(action: StringBuilder.() -> Unit): String {
 
 通过 jadx 工具将 class 转为 java后，代码如下
 
-![](../../../resources/base/receiver/jadx_1.png)
+![](../../../resources/basic/receiver/jadx_1.png)
 
 * main 方法中原本的 lambda 被转为了 `buildString("", ReceiverKt$main$1.INSTANCE)`，ReceiverKt$main$1 是什么我们稍后分析
 * buildString 方法接收了一个 Function1 类型的对象，证明 ReceiverKt$main$1 是 kt 帮我们生成的并且实现了 Function1
@@ -45,7 +45,7 @@ fun String.buildString(action: StringBuilder.() -> Unit): String {
 
 
 下面来看看 ReceiverKt$main$1 是什么
-![img.png](../../../resources/base/receiver/jadx_2.png)
+![img.png](../../../resources/basic/receiver/jadx_2.png)
 
 很简单，就是通过 invoke 调用我们 buildString lambda 里的内容
 
@@ -73,11 +73,11 @@ fun String.buildString_(action: (stringbuilder: StringBuilder) -> Unit): String 
 
 这段代码转为 Java 后是什么样的呢？
 
-![img.png](../../../resources/base/receiver/jadx_3.png)
+![img.png](../../../resources/basic/receiver/jadx_3.png)
 
-![img.png](../../../resources/base/receiver/jadx_4.png)
+![img.png](../../../resources/basic/receiver/jadx_4.png)
 
-![img.png](../../../resources/base/receiver/jadx_5.png)
+![img.png](../../../resources/basic/receiver/jadx_5.png)
 
 可以看到使用 Receiver 的方式和使用给 lambda 函数定义参数的方式转为 Java 代码后只是在 invoke 参数的变量名有区别，仅此而已。
 

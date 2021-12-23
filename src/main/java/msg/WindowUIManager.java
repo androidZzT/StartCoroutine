@@ -9,6 +9,8 @@ public class WindowUIManager {
         void onWindowStateChanged(boolean showing);
     }
 
+    private static final String TAG = "WindowUIManager";
+
     private final OnWindowStateChangeListener listener;
     private Timer timer = new Timer("UI");
     private String currentView;
@@ -21,16 +23,16 @@ public class WindowUIManager {
     }
 
     public synchronized void show(MessageVO msg) {
-        System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] show called " + msg.id);
+        Logger.i(TAG, "show called " + msg.id);
         showTask = new TimerTask() {
             @Override
             public void run() {
-                System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] show " + msg.id);
+                Logger.i(TAG, "show " + msg.id);
                 currentView = msg.id;
                 showing = true;
                 listener.onWindowStateChanged(true);
 
-                System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] auto remove after 5 sec " + msg.id);
+                Logger.i(TAG, "auto remove after 5 sec " + msg.id);
                 autoRemoveTask = new TimerTask() {
                     @Override
                     public void run() {
@@ -45,20 +47,20 @@ public class WindowUIManager {
 
     public synchronized void update(MessageVO msg) {
         if (showing && currentView.equals(msg.id)) {
-            System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] update called " + msg);
+            Logger.i(TAG, "update called " + msg);
         }
     }
 
     public synchronized void removeCurrent() {
         if (!showing) {
-            System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] removeCurrent failed, no showing window");
+            Logger.i(TAG, "removeCurrent failed, no showing window");
             return;
         }
         autoRemoveTask.cancel();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] remove " + currentView);
+                Logger.i(TAG, "remove " + currentView);
                 currentView = null;
                 showing = false;
                 listener.onWindowStateChanged(false);
@@ -67,9 +69,12 @@ public class WindowUIManager {
     }
 
     public synchronized void safeRemove() {
-        System.out.println(Thread.currentThread().getName() + "-[WindowUIManager] safeRemove called showing="+showing +" showTask="+showTask);
-        if (!showing && showTask != null) {
-            showTask.cancel();
+        Logger.i(TAG, "safeRemove called showing="+showing +" showTask="+showTask);
+        if (!showing) {
+            if (showTask != null) {
+                showTask.cancel();
+            }
+            listener.onWindowStateChanged(false);
         }
     }
 }

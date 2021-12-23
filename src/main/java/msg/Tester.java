@@ -4,7 +4,8 @@ public class Tester {
     public static void main(String[] args) {
 //        add_3_times();
 //        add_remove_when_showing();
-        add_remove_immediately();
+        add_remove_after_show_before_attach();
+//        add_remove_immediately();
     }
 
     private static void add_3_times() {
@@ -13,6 +14,7 @@ public class Tester {
             msg.id = i + "";
             msg.title = "haha";
             msg.content = "test";
+            msg.priority = i;
             MessageCenterManager.getInstance().add(msg);
         }
     }
@@ -28,7 +30,7 @@ public class Tester {
             @Override
             public void run() {
                 try {
-                    sleep(2000);
+                    sleep(180);
                     MessageCenterManager.getInstance().remove(msg.id);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -36,16 +38,27 @@ public class Tester {
             }
         };
         t.start();
-        try {
-            t.join();
-            MessageVO msg2 = new MessageVO();
-            msg2.id = "002";
-            msg2.title = "xixi";
-            msg2.content = "test";
-            MessageCenterManager.getInstance().add(msg2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    }
+
+    private static void add_remove_after_show_before_attach() {
+        MessageVO msg = new MessageVO();
+        msg.id = "001";
+        msg.title = "haha";
+        msg.content = "test";
+        MessageCenterManager.getInstance().add(msg);
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    sleep(210);
+                    MessageCenterManager.getInstance().remove(msg.id);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        t.start();
     }
 
     private static void add_remove_immediately() {

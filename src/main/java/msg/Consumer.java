@@ -1,6 +1,7 @@
 package msg;
 
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 public class Consumer<T> implements Runnable {
 
@@ -8,13 +9,15 @@ public class Consumer<T> implements Runnable {
         void onConsume(T element);
     }
 
-    private final BlockingDeque<T> blockingDeque;
+    private static final String TAG = "Consumer";
+
+    private final BlockingQueue<T> blockingQueue;
     private CallBack<T> callBack;
     private boolean interrupted = false;
     private final Object lock = new Object();
 
-    public Consumer(BlockingDeque<T> blockingDeque) {
-        this.blockingDeque = blockingDeque;
+    public Consumer(BlockingQueue<T> blockingQueue) {
+        this.blockingQueue = blockingQueue;
     }
 
     public void setCallBack(CallBack<T> callBack) {
@@ -22,7 +25,7 @@ public class Consumer<T> implements Runnable {
     }
 
     public void notifyTake() {
-        System.out.println(Thread.currentThread().getName()+ "-notifyTake called");
+        Logger.i(TAG, "notifyTake called");
         synchronized (lock) {
             lock.notify();
         }
@@ -36,7 +39,7 @@ public class Consumer<T> implements Runnable {
     public void run() {
         while (!interrupted) {
             try {
-                T element = blockingDeque.takeLast();
+                T element = blockingQueue.take();
                 callBack.onConsume(element);
                 synchronized (lock) {
                     lock.wait();
@@ -45,6 +48,6 @@ public class Consumer<T> implements Runnable {
                 e.printStackTrace();
             }
         }
-        System.out.println(Thread.currentThread().getName()+ "-interrupted!");
+        Logger.i(TAG, "interrupted!");
     }
 }
